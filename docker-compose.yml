@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  cron-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cron-job-scheduler
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    # Enable this to run cron jobs on the host (for Docker volume backup operations, etc.)
+    # privileged: true

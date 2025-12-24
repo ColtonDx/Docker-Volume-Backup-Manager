@@ -1,0 +1,420 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+header p {
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+section {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="password"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+    font-family: inherit;
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+}
+
+input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+small {
+    display: block;
+    color: #666;
+    margin-top: 5px;
+    font-size: 0.9em;
+}
+
+.label-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.label-input-group input {
+    flex: 1;
+}
+
+.label-input-group .label-key {
+    flex: 0.8;
+}
+
+.label-input-group .label-value {
+    flex: 1.2;
+}
+
+.btn-remove {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.3s;
+}
+
+.btn-remove:hover {
+    background: #c0392b;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #ecf0f1;
+    color: #333;
+    margin-right: 10px;
+}
+
+.btn-secondary:hover {
+    background: #d5dbdb;
+}
+
+.jobs-section {
+    grid-column: 1 / -1;
+}
+
+.jobs-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.job-card {
+    background: #f8f9fa;
+    border-left: 4px solid #667eea;
+    border-radius: 5px;
+    padding: 20px;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.job-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.job-card.disabled {
+    opacity: 0.6;
+    border-left-color: #ccc;
+}
+
+.job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 15px;
+}
+
+.job-name {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.job-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.job-status.enabled {
+    background: #d4edda;
+    color: #155724;
+}
+
+.job-status.disabled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.job-schedule {
+    color: #666;
+    font-family: 'Courier New', monospace;
+    margin: 10px 0;
+    font-size: 0.9em;
+}
+
+.job-script {
+    background: white;
+    padding: 10px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85em;
+    color: #333;
+    max-height: 100px;
+    overflow-y: auto;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.job-labels {
+    margin: 10px 0;
+}
+
+.job-labels h4 {
+    font-size: 0.9em;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.label-badge {
+    display: inline-block;
+    background: #e8f4f8;
+    color: #0066cc;
+    padding: 3px 8px;
+    border-radius: 3px;
+    margin: 2px;
+    font-size: 0.8em;
+    font-family: 'Courier New', monospace;
+}
+
+.job-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-edit,
+.btn-delete,
+.btn-toggle {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-edit {
+    background: #667eea;
+    color: white;
+}
+
+.btn-edit:hover {
+    background: #5568d3;
+}
+
+.btn-delete {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #c0392b;
+}
+
+.btn-toggle {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-toggle.disable {
+    background: #95a5a6;
+}
+
+.btn-toggle:hover {
+    opacity: 0.9;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal.visible {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close:hover {
+    color: #000;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-buttons .btn-primary {
+    flex: 1;
+}
+
+.modal-buttons .btn-secondary {
+    flex: 1;
+    width: 100%;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    main {
+        grid-template-columns: 1fr;
+    }
+
+    .jobs-list {
+        grid-template-columns: 1fr;
+    }
+
+    header h1 {
+        font-size: 1.8em;
+    }
+
+    section {
+        padding: 20px;
+    }
+
+    .job-actions {
+        flex-direction: column;
+    }
+
+    .btn-edit,
+    .btn-delete,
+    .btn-toggle {
+        width: 100%;
+    }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.empty-state p {
+    font-size: 1.1em;
+}
