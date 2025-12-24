@@ -74,6 +74,23 @@ textarea {
     transition: border-color 0.3s;
 }
 
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+ 
+
+select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+}   font-size: 1em;
+    font-family: inherit;
+    transition: border-color 0.3s;
+    background-color: white;
+}
+
 input[type="text"]:focus,
 textarea:focus {
     outline: none;
@@ -411,7 +428,11 @@ small {
 
 .empty-state {
     text-align: center;
-    padding: 40px 20px;
+ 
+
+.hidden {
+    display: none !important;
+}   padding: 40px 20px;
     color: #999;
 }
 

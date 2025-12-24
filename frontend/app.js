@@ -3,36 +3,72 @@ const API_URL = '/api/jobs';
 
 // DOM elements
 const jobForm = document.getElementById('jobForm');
-const jobNameInput = document.getElementById('jobName');
-const scheduleInput = document.getElementById('schedule');
-const scriptInput = document.getElementById('script');
-const labelsContainer = document.getElementById('labelsContainer');
-const addLabelBtn = document.getElementById('addLabelBtn');
+const backupLabel = document.getElementById('backupLabel');
+const frequency = document.getElementById('frequency');
+const customCronInput = document.getElementById('customCron');
+const customCronGroup = document.getElementById('customCronGroup');
 const enabledCheckbox = document.getElementById('enabled');
 const jobsList = document.getElementById('jobsList');
 
 const editModal = document.getElementById('editModal');
 const editForm = document.getElementById('editForm');
 const editJobId = document.getElementById('editJobId');
-const editJobName = document.getElementById('editJobName');
-const editSchedule = document.getElementById('editSchedule');
-const editScript = document.getElementById('editScript');
-const editLabelsContainer = document.getElementById('editLabelsContainer');
-const editAddLabelBtn = document.getElementById('editAddLabelBtn');
+const editBackupLabel = document.getElementById('editBackupLabel');
+const editFrequency = document.getElementById('editFrequency');
+const editCustomCronInput = document.getElementById('editCustomCron');
+const editCustomCronGroup = document.getElementById('editCustomCronGroup');
 const editEnabled = document.getElementById('editEnabled');
 const closeModalBtn = document.querySelector('.close');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
 
+// Frequency to cron mapping
+const frequencyMap = {
+    'hourly': '0 * * * *',
+    'daily': '0 0 * * *',
+    'weekly': '0 0 * * 0',
+    'monthly': '0 0 1 * *'
+};
+
 // Event listeners
-jobForm.addEventListener('submit', handleCreateJob);
-addLabelBtn.addEventListener('click', addLabelInput);
-editForm.addEventListener('submit', handleEditJob);
-editAddLabelBtn.addEventListener('click', () => addEditLabelInput());
+jobForm.addEventListener('submit', handleCreateBackup);
+frequency.addEventListener('change', handleFrequencyChange);
+editFrequency.addEventListener('change', handleEditFrequencyChange);
+editForm.addEventListener('submit', handleEditBackup);
 closeModalBtn.addEventListener('click', closeModal);
 cancelEditBtn.addEventListener('click', closeModal);
 
 // Initialize
 loadAndDisplayJobs();
+
+// Handle frequency change to show/hide custom cron input
+function handleFrequencyChange() {
+    if (frequency.value === 'custom') {
+        customCronGroup.classList.remove('hidden');
+        customCronInput.required = true;
+    } else {
+        customCronGroup.classList.add('hidden');
+        customCronInput.required = false;
+    }
+}
+
+// Handle edit frequency change
+function handleEditFrequencyChange() {
+    if (editFrequency.value === 'custom') {
+        editCustomCronGroup.classList.remove('hidden');
+        editCustomCronInput.required = true;
+    } else {
+        editCustomCronGroup.classList.add('hidden');
+        editCustomCronInput.required = false;
+    }
+}
+
+// Convert frequency to cron expression
+function getScheduleFromFrequency(freq, customCron) {
+    if (freq === 'custom') {
+        return customCron;
+    }
+    return frequencyMap[freq] || frequencyMap['daily'];
+}
 
 // Load and display all jobs
 async function loadAndDisplayJobs() {
@@ -48,14 +84,14 @@ async function loadAndDisplayJobs() {
 // Display jobs
 function displayJobs(jobs) {
     if (jobs.length === 0) {
-        jobsList.innerHTML = '<div class="empty-state"><p>No jobs scheduled yet. Create one above!</p></div>';
+        jobsList.innerHTML = '<div class="empty-state"><p>No backups scheduled yet. Create one above!</p></div>';
         return;
     }
 
     jobsList.innerHTML = jobs.map(job => `
         <div class="job-card ${job.enabled ? '' : 'disabled'}">
             <div class="job-header">
-                <h3 class="job-name">${escapeHtml(job.name)}</h3>
+                <h3 class="job-name">${escapeHtml(job.backupLabel)}</h3>
                 <span class="job-status ${job.enabled ? 'enabled' : 'disabled'}">
                     ${job.enabled ? '✓ Enabled' : '✗ Disabled'}
                 </span>
@@ -63,18 +99,9 @@ function displayJobs(jobs) {
             <div class="job-schedule">
                 <strong>Schedule:</strong> ${escapeHtml(job.schedule)}
             </div>
-            <div class="job-script">
-                <strong>Script:</strong><br>
-                ${escapeHtml(job.script)}
+            <div class="job-schedule">
+                <strong>Frequency:</strong> ${escapeHtml(job.frequency)}
             </div>
-            ${job.labels && Object.keys(job.labels).length > 0 ? `
-                <div class="job-labels">
-                    <h4>Environment Labels:</h4>
-                    ${Object.entries(job.labels).map(([key, value]) => 
-                        `<span class="label-badge">${escapeHtml(key)}=${escapeHtml(value)}</span>`
-                    ).join('')}
-                </div>
-            ` : ''}
             <div class="job-actions">
                 <button class="btn-edit" onclick="openEditModal('${job.id}')">Edit</button>
                 <button class="btn-toggle ${job.enabled ? 'disable' : ''}" onclick="toggleJob('${job.id}')">
@@ -86,22 +113,17 @@ function displayJobs(jobs) {
     `).join('');
 }
 
-// Handle create job
-async function handleCreateJob(e) {
+// Handle create backup
+async function handleCreateBackup(e) {
     e.preventDefault();
 
-    const labels = {};
-    document.querySelectorAll('#labelsContainer .label-input-group').forEach(group => {
-        const key = group.querySelector('.label-key').value.trim();
-        const value = group.querySelector('.label-value').value.trim();
-        if (key) labels[key] = value;
-    });
+    const freq = frequency.value;
+    const schedule = getScheduleFromFrequency(freq, customCronInput.value);
 
     const jobData = {
-        name: jobNameInput.value,
-        schedule: scheduleInput.value,
-        script: scriptInput.value,
-        labels: labels,
+        backupLabel: backupLabel.value,
+        frequency: freq,
+        schedule: schedule,
         enabled: enabledCheckbox.checked
     };
 
@@ -112,43 +134,19 @@ async function handleCreateJob(e) {
             body: JSON.stringify(jobData)
         });
 
-        if (!response.ok) throw new Error('Failed to create job');
+        if (!response.ok) throw new Error('Failed to create backup');
 
         // Reset form
         jobForm.reset();
-        labelsContainer.innerHTML = '';
+        customCronGroup.classList.add('hidden');
         enabledCheckbox.checked = true;
 
         // Reload jobs
         loadAndDisplayJobs();
     } catch (error) {
-        console.error('Error creating job:', error);
-        alert('Failed to create job: ' + error.message);
+        console.error('Error creating backup:', error);
+        alert('Failed to create backup: ' + error.message);
     }
-}
-
-// Add label input
-function addLabelInput() {
-    const group = document.createElement('div');
-    group.className = 'label-input-group';
-    group.innerHTML = `
-        <input type="text" class="label-key" placeholder="Label name (e.g., BACKUP_DIR)">
-        <input type="text" class="label-value" placeholder="Value (e.g., /data/backup)">
-        <button type="button" class="btn-remove" onclick="this.parentElement.remove()">Remove</button>
-    `;
-    labelsContainer.appendChild(group);
-}
-
-// Add edit label input
-function addEditLabelInput() {
-    const group = document.createElement('div');
-    group.className = 'label-input-group';
-    group.innerHTML = `
-        <input type="text" class="label-key" placeholder="Label name (e.g., BACKUP_DIR)">
-        <input type="text" class="label-value" placeholder="Value (e.g., /data/backup)">
-        <button type="button" class="btn-remove" onclick="this.parentElement.remove()">Remove</button>
-    `;
-    editLabelsContainer.appendChild(group);
 }
 
 // Open edit modal
@@ -159,50 +157,36 @@ async function openEditModal(jobId) {
         const job = await response.json();
 
         editJobId.value = job.id;
-        editJobName.value = job.name;
-        editSchedule.value = job.schedule;
-        editScript.value = job.script;
+        editBackupLabel.value = job.backupLabel;
+        editFrequency.value = job.frequency;
         editEnabled.checked = job.enabled;
 
-        // Clear and populate labels
-        editLabelsContainer.innerHTML = '';
-        if (job.labels) {
-            Object.entries(job.labels).forEach(([key, value]) => {
-                const group = document.createElement('div');
-                group.className = 'label-input-group';
-                group.innerHTML = `
-                    <input type="text" class="label-key" value="${escapeHtml(key)}" placeholder="Label name">
-                    <input type="text" class="label-value" value="${escapeHtml(value)}" placeholder="Value">
-                    <button type="button" class="btn-remove" onclick="this.parentElement.remove()">Remove</button>
-                `;
-                editLabelsContainer.appendChild(group);
-            });
+        if (job.frequency === 'custom') {
+            editCustomCronInput.value = job.schedule;
+            editCustomCronGroup.classList.remove('hidden');
+        } else {
+            editCustomCronGroup.classList.add('hidden');
         }
 
         editModal.classList.remove('hidden');
         editModal.classList.add('visible');
     } catch (error) {
         console.error('Error opening edit modal:', error);
-        alert('Failed to load job details');
+        alert('Failed to load backup details');
     }
 }
 
-// Handle edit job
-async function handleEditJob(e) {
+// Handle edit backup
+async function handleEditBackup(e) {
     e.preventDefault();
 
-    const labels = {};
-    document.querySelectorAll('#editLabelsContainer .label-input-group').forEach(group => {
-        const key = group.querySelector('.label-key').value.trim();
-        const value = group.querySelector('.label-value').value.trim();
-        if (key) labels[key] = value;
-    });
+    const freq = editFrequency.value;
+    const schedule = getScheduleFromFrequency(freq, editCustomCronInput.value);
 
     const jobData = {
-        name: editJobName.value,
-        schedule: editSchedule.value,
-        script: editScript.value,
-        labels: labels,
+        backupLabel: editBackupLabel.value,
+        frequency: freq,
+        schedule: schedule,
         enabled: editEnabled.checked
     };
 
@@ -213,13 +197,13 @@ async function handleEditJob(e) {
             body: JSON.stringify(jobData)
         });
 
-        if (!response.ok) throw new Error('Failed to update job');
+        if (!response.ok) throw new Error('Failed to update backup');
 
         closeModal();
         loadAndDisplayJobs();
     } catch (error) {
-        console.error('Error updating job:', error);
-        alert('Failed to update job: ' + error.message);
+        console.error('Error updating backup:', error);
+        alert('Failed to update backup: ' + error.message);
     }
 }
 
@@ -256,7 +240,7 @@ async function toggleJob(jobId) {
 
 // Delete job
 async function deleteJob(jobId) {
-    if (!confirm('Are you sure you want to delete this job?')) return;
+    if (!confirm('Are you sure you want to delete this backup schedule?')) return;
 
     try {
         const response = await fetch(`${API_URL}/${jobId}`, {

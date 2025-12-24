@@ -56,36 +56,41 @@ function initCronJob(job) {
   if (!job.enabled) return;
 
   const task = cron.schedule(job.schedule, () => {
-    console.log(`[${new Date().toISOString()}] Executing job: ${job.name}`);
+    console.log(`[${new Date().toISOString()}] Starting backup: ${job.backupLabel}`);
     
-    // Prepare environment variables from labels
-    const env = { ...process.env };
-    if (job.labels) {
-      Object.assign(env, job.labels);
-    }
+    // Execute the Docker volume backup script
+    // This is a placeholder - replace with your actual backup script
+    const backupScript = `
+      echo "Executing backup for: ${job.backupLabel}"
+      # Add your Docker volume backup commands here
+      # Example: docker run --rm -v volume_name:/data -v backup_location:/backup alpine tar -czf /backup/backup_$(date +%Y%m%d_%H%M%S).tar.gz /data
+    `;
 
-    // Execute the script
-    const proc = spawn('bash', ['-c', job.script], { env });
+    const proc = spawn('bash', ['-c', backupScript]);
     
     let stdout = '';
     let stderr = '';
 
     proc.stdout.on('data', (data) => {
       stdout += data.toString();
+      console.log(`[${job.backupLabel}] ${data.toString().trim()}`);
     });
 
     proc.stderr.on('data', (data) => {
       stderr += data.toString();
+      console.error(`[${job.backupLabel}] Error: ${data.toString().trim()}`);
     });
 
     proc.on('close', (code) => {
-      console.log(`Job "${job.name}" completed with exit code ${code}`);
-      if (stderr) console.error(`STDERR: ${stderr}`);
+      console.log(`Backup "${job.backupLabel}" completed with exit code ${code}`);
+      if (code !== 0) {
+        console.error(`Backup failed for ${job.backupLabel}`);
+      }
     });
   });
 
   activeJobs[job.id] = task;
-  console.log(`Scheduled job: ${job.name} (${job.schedule})`);
+  console.log(`Scheduled backup: ${job.backupLabel} (${job.schedule})`);
 }
 
 // GET all jobs
@@ -107,10 +112,9 @@ app.post('/api/jobs', (req, res) => {
   const jobs = loadJobs();
   const newJob = {
     id: Date.now().toString(),
-    name: req.body.name,
+    backupLabel: req.body.backupLabel,
+    frequency: req.body.frequency,
     schedule: req.body.schedule,
-    script: req.body.script,
-    labels: req.body.labels || {},
     enabled: req.body.enabled !== false,
     createdAt: new Date().toISOString()
   };
@@ -131,10 +135,9 @@ app.put('/api/jobs/:id', (req, res) => {
   const updatedJob = {
     ...jobs[jobIndex],
     name: req.body.name,
-    schedule: req.body.schedule,
-    script: req.body.script,
-    labels: req.body.labels || {},
-    enabled: req.body.enabled !== false
+    backupLabel: req.body.backupLabel,
+    frequency: req.body.frequency,
+    schedule: req.body.schedule false
   };
 
   jobs[jobIndex] = updatedJob;

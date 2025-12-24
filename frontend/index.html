@@ -3,91 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cron Job Scheduler</title>
+    <title>Simple Docker Volume Backup</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📅 Cron Job Scheduler</h1>
-            <p>Schedule jobs and manage environment labels</p>
+            <h1>� Simple Docker Volume Backup</h1>
+            <p>Schedule automated backups of your Docker volumes</p>
         </header>
 
         <main>
             <section class="form-section">
-                <h2>Create New Job</h2>
+                <h2>Schedule New Backup</h2>
                 <form id="jobForm">
                     <div class="form-group">
-                        <label for="jobName">Job Name:</label>
-                        <input type="text" id="jobName" placeholder="e.g., Database Backup" required>
+                        <label for="backupLabel">Backup Label:</label>
+                        <input type="text" id="backupLabel" placeholder="e.g., database, app-data, media" required>
+                        <small>A descriptive name for the volume(s) being backed up</small>
                     </div>
 
                     <div class="form-group">
-                        <label for="schedule">Cron Schedule:</label>
-                        <input type="text" id="schedule" placeholder="e.g., 0 0 * * * (daily at midnight)" required>
-                        <small>Format: minute hour day month day-of-week (0-59 0-23 1-31 1-12 0-6)</small>
+                        <label for="frequency">Backup Frequency:</label>
+                        <select id="frequency" required>
+                            <option value="">-- Select Frequency --</option>
+                            <option value="hourly">Hourly (every hour)</option>
+                            <option value="daily">Daily (midnight)</option>
+                            <option value="weekly">Weekly (Sunday midnight)</option>
+                            <option value="monthly">Monthly (1st at midnight)</option>
+                            <option value="custom">Custom Cron Expression</option>
+                        </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="script">Script/Command:</label>
-                        <textarea id="script" placeholder="Enter bash script or command to execute" rows="6" required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Labels (Environment Variables):</label>
-                        <div id="labelsContainer"></div>
-                        <button type="button" id="addLabelBtn" class="btn-secondary">+ Add Label</button>
+                    <div class="form-group hidden" id="customCronGroup">
+                        <label for="customCron">Cron Expression:</label>
+                        <input type="text" id="customCron" placeholder="e.g., 0 2 * * * (2 AM daily)">
+                        <small>Format: minute hour day month day-of-week</small>
                     </div>
 
                     <div class="form-group">
                         <label>
                             <input type="checkbox" id="enabled" checked>
-                            Enable this job
+                            Enable this backup schedule
                         </label>
                     </div>
 
-                    <button type="submit" class="btn-primary">Create Job</button>
+                    <button type="submit" class="btn-primary">Create Backup Schedule</button>
                 </form>
             </section>
-
+Backup
             <section class="jobs-section">
                 <h2>Scheduled Jobs</h2>
                 <div id="jobsList" class="jobs-list"></div>
             </section>
         </main>
-    </div>
-
-    <!-- Modal for editing jobs -->
+    </div>backups -->
     <div id="editModal" class="modal hidden">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>Edit Job</h2>
+            <h2>Edit Backup Schedule</h2>
             <form id="editForm">
                 <input type="hidden" id="editJobId">
                 
                 <div class="form-group">
-                    <label for="editJobName">Job Name:</label>
-                    <input type="text" id="editJobName" required>
+                    <label for="editBackupLabel">Backup Label:</label>
+                    <input type="text" id="editBackupLabel" required>
+                    <small>A descriptive name for the volume(s) being backed up</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="editSchedule">Cron Schedule:</label>
-                    <input type="text" id="editSchedule" required>
+                    <label for="editFrequency">Backup Frequency:</label>
+                    <select id="editFrequency" required>
+                        <option value="">-- Select Frequency --</option>
+                        <option value="hourly">Hourly (every hour)</option>
+                        <option value="daily">Daily (midnight)</option>
+                        <option value="weekly">Weekly (Sunday midnight)</option>
+                        <option value="monthly">Monthly (1st at midnight)</option>
+                        <option value="custom">Custom Cron Expression</option>
+                    </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="editScript">Script/Command:</label>
-                    <textarea id="editScript" rows="6" required></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Labels (Environment Variables):</label>
-                    <div id="editLabelsContainer"></div>
-                    <button type="button" id="editAddLabelBtn" class="btn-secondary">+ Add Label</button>
+                <div class="form-group hidden" id="editCustomCronGroup">
+                    <label for="editCustomCron">Cron Expression:</label>
+                    <input type="text" id="editCustomCron" placeholder="e.g., 0 2 * * * (2 AM daily)">
+                    <small>Format: minute hour day month day-of-week</small>
                 </div>
 
                 <div class="form-group">
                     <label>
+                        <input type="checkbox" id="editEnabled">
+                        Enable this backup schedule
                         <input type="checkbox" id="editEnabled">
                         Enable this job
                     </label>
