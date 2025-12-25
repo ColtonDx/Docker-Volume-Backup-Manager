@@ -26,6 +26,10 @@ const settingsForm = document.getElementById('settingsForm');
 const settingsClose = document.getElementById('settingsClose');
 const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
 const backupNameSchema = document.getElementById('backupNameSchema');
+const darkModeToggle = document.getElementById('darkModeToggle');
+const backgroundGradientStart = document.getElementById('backgroundGradientStart');
+const backgroundGradientEnd = document.getElementById('backgroundGradientEnd');
+const backgroundImage = document.getElementById('backgroundImage');
 const ignorePatternsList = document.getElementById('ignorePatternsList');
 const addPatternBtn = document.getElementById('addPatternBtn');
 const rcloneConfig = document.getElementById('rcloneConfig');
@@ -117,17 +121,10 @@ async function initialize() {
         const settingsResponse = await fetch('/api/settings');
         if (settingsResponse.ok) {
             const backendSettings = await settingsResponse.json();
-            if (backendSettings.backupNameSchema) {
-                backupNameSchema.value = backendSettings.backupNameSchema;
-            }
-            if (backendSettings.ignorePattern) {
-                ignorePattern.value = backendSettings.ignorePattern;
-            }
-            updateSchemaPreview();
+            applyThemeSettings(backendSettings);
         }
     } catch (err) {
         console.log('Note: Settings will use defaults. Backend settings not available yet.');
-        loadSettings(); // Fall back to localStorage
     }
     
     loadAndDisplayJobs();
@@ -501,6 +498,12 @@ function loadSettings() {
             .then(settings => {
                 backupNameSchema.value = settings.backupNameSchema || 'backup_{label}_{date}';
                 
+                // Load theme settings
+                darkModeToggle.checked = settings.darkMode || false;
+                backgroundGradientStart.value = settings.backgroundGradientStart || '#667eea';
+                backgroundGradientEnd.value = settings.backgroundGradientEnd || '#764ba2';
+                backgroundImage.value = settings.backgroundImage || '';
+                
                 // Load ignore patterns
                 const patterns = settings.ignorePatterns || [];
                 ignorePatternsList.innerHTML = '';
@@ -554,6 +557,33 @@ function saveSettings(settings) {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 }
 
+function applyThemeSettings(settings) {
+    // Apply dark mode
+    if (settings.darkMode) {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+    }
+
+    // Apply background gradient
+    const startColor = settings.backgroundGradientStart || '#667eea';
+    const endColor = settings.backgroundGradientEnd || '#764ba2';
+    let backgroundStyle = `linear-gradient(135deg, ${startColor} 0%, ${endColor} 100%)`;
+
+    // Apply background image if provided
+    if (settings.backgroundImage && settings.backgroundImage.trim()) {
+        backgroundStyle = `
+            url('${settings.backgroundImage}'),
+            linear-gradient(135deg, ${startColor} 0%, ${endColor} 100%)
+        `;
+        document.body.style.backgroundSize = 'cover, cover';
+        document.body.style.backgroundPosition = 'center, center';
+        document.body.style.backgroundAttachment = 'fixed, fixed';
+    }
+
+    document.body.style.background = backgroundStyle;
+}
+
 function updateSchemaPreview() {
     const schema = backupNameSchema.value;
     const preview = schema
@@ -587,6 +617,10 @@ async function handleSaveSettings(e) {
     
     const settings = {
         backupNameSchema: backupNameSchema.value,
+        darkMode: darkModeToggle.checked,
+        backgroundGradientStart: backgroundGradientStart.value,
+        backgroundGradientEnd: backgroundGradientEnd.value,
+        backgroundImage: backgroundImage.value,
         ignorePatterns: ignorePatterns,
         rcloneConfig: rcloneConfig.value
     };
@@ -601,6 +635,9 @@ async function handleSaveSettings(e) {
 
         if (!response.ok) throw new Error('Failed to save settings');
 
+        // Apply theme immediately
+        applyThemeSettings(settings);
+        
         // Also save to localStorage for UI state
         saveSettings(settings);
         closeSettingsModal();

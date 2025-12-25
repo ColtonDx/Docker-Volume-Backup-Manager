@@ -712,32 +712,38 @@ small {
 .empty-state p {
     font-size: 1.1em;
 }
+
 /* Settings fieldsets */
 fieldset {
     border: 1px solid #e0e0e0;
     border-radius: 6px;
-    padding: 15px;
-    margin-bottom: 20px;
+    padding: 25px;
+    margin-bottom: 30px;
 }
 
 legend {
     font-weight: 600;
-    font-size: 1em;
+    font-size: 1.1em;
     color: #333;
-    padding: 0 5px;
+    padding: 0 10px;
+    margin-bottom: 15px;
+}
+
+.settings-modal-wide {
+    max-width: 700px !important;
 }
 
 /* Ignore patterns list */
 #ignorePatternsList {
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .pattern-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 8px;
-    padding: 10px;
+    margin-bottom: 10px;
+    padding: 12px;
     background: #f5f5f5;
     border-radius: 4px;
 }
@@ -774,4 +780,107 @@ legend {
     font-size: 0.9em;
     line-height: 1.4;
     resize: vertical;
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #e0e0e0;
+}
+
+body.dark-mode section {
+    background: #2a2a3e;
+    color: #e0e0e0;
+}
+
+body.dark-mode h2 {
+    color: #e0e0e0;
+}
+
+body.dark-mode label {
+    color: #e0e0e0;
+}
+
+body.dark-mode input[type="text"],
+body.dark-mode input[type="password"],
+body.dark-mode input[type="color"],
+body.dark-mode textarea,
+body.dark-mode select {
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border-color: #444;
+}
+
+body.dark-mode input[type="text"]:focus,
+body.dark-mode textarea:focus,
+body.dark-mode select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+}
+
+body.dark-mode input[type="checkbox"] {
+    accent-color: #667eea;
+}
+
+body.dark-mode .jobs-table {
+    background: #2a2a3e;
+    color: #e0e0e0;
+}
+
+body.dark-mode .jobs-table thead {
+    background: #1a1a2e;
+    border-bottom-color: #444;
+}
+
+body.dark-mode .jobs-table th {
+    color: #e0e0e0;
+}
+
+body.dark-mode .jobs-table td {
+    color: #b0b0b0;
+    border-bottom-color: #444;
+}
+
+body.dark-mode .jobs-table tbody tr:hover {
+    background: #3a3a4e;
+}
+
+body.dark-mode .jobs-table code {
+    background: #1a1a2e;
+    color: #a0d8ff;
+}
+
+body.dark-mode .modal-content {
+    background: #2a2a3e;
+    color: #e0e0e0;
+}
+
+body.dark-mode .close {
+    color: #999;
+}
+
+body.dark-mode .close:hover {
+    color: #ddd;
+}
+
+body.dark-mode fieldset {
+    border-color: #444;
+    background: #1a1a2e;
+}
+
+body.dark-mode legend {
+    color: #e0e0e0;
+}
+
+body.dark-mode .pattern-item {
+    background: #1a1a2e;
+    border: 1px solid #444;
+}
+
+body.dark-mode small {
+    color: #999;
+}
+
+body.dark-mode .dropdown-menu {
+    background: rgba(20, 20, 40, 0.98);
 }

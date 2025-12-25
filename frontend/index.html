@@ -151,12 +151,39 @@
 
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal hidden">
-        <div class="modal-content">
+        <div class="modal-content settings-modal-wide">
             <div class="modal-header">
-                <h2>Backup Settings</h2>
+                <h2>Settings</h2>
                 <span class="close" id="settingsClose">&times;</span>
             </div>
             <form id="settingsForm">
+                <!-- Theme Section -->
+                <fieldset>
+                    <legend>Appearance</legend>
+                    <div class="form-group">
+                        <label for="darkModeToggle">
+                            <input type="checkbox" id="darkModeToggle">
+                            Dark Mode
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="backgroundGradient">Background Gradient:</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="color" id="backgroundGradientStart" value="#667eea" title="Gradient Start Color">
+                            <span>to</span>
+                            <input type="color" id="backgroundGradientEnd" value="#764ba2" title="Gradient End Color">
+                        </div>
+                        <small>Choose start and end colors for the background gradient</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="backgroundImage">Background Image URL:</label>
+                        <input type="text" id="backgroundImage" placeholder="Leave empty for gradient only">
+                        <small>Optional: Enter a URL to an image to use as background (gradient will be overlay)</small>
+                    </div>
+                </fieldset>
+
                 <!-- Backup Name Schema Section -->
                 <fieldset>
                     <legend>Backup Naming</legend>
@@ -174,11 +201,11 @@
                 <!-- Ignore Patterns Section -->
                 <fieldset>
                     <legend>Ignore Patterns (Regex)</legend>
-                    <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Volumes matching these patterns will be excluded from backups</p>
+                    <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">Volumes matching these patterns will be excluded from backups</p>
                     
                     <div id="ignorePatternsList"></div>
                     
-                    <div style="margin-top: 10px;">
+                    <div style="margin-top: 15px;">
                         <button type="button" class="btn-secondary" id="addPatternBtn">+ Add Pattern</button>
                     </div>
                 </fieldset>
@@ -188,7 +215,7 @@
                     <legend>Rclone Configuration</legend>
                     <div class="form-group">
                         <label for="rcloneConfig">Rclone Config:</label>
-                        <textarea id="rcloneConfig" placeholder="Paste your rclone.conf contents here" style="font-family: monospace; height: 200px;"></textarea>
+                        <textarea id="rcloneConfig" placeholder="Paste your rclone.conf contents here" style="font-family: monospace; height: 150px;"></textarea>
                         <small>Edit and save your rclone configuration directly in the web UI</small>
                     </div>
                 </fieldset>
