@@ -150,7 +150,7 @@ function showFormSection() {
     retentionCount.disabled = false;
     formSection.classList.remove('hidden');
     formSection.scrollIntoView({ behavior: 'smooth' });
-}}
+}
 
 // Hide form section
 function hideFormSection() {
