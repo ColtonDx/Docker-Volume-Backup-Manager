@@ -497,8 +497,8 @@ function loadSettings() {
                 backupNameSchema.value = settings.backupNameSchema || 'backup_{label}_{date}';
                 
                 // Load theme settings
-                backgroundGradientStart.value = settings.backgroundGradientStart || '#667eea';
-                backgroundGradientEnd.value = settings.backgroundGradientEnd || '#764ba2';
+                backgroundGradientStart.value = settings.backgroundGradientStart || '#1a1a2e';
+                backgroundGradientEnd.value = settings.backgroundGradientEnd || '#16213e';
                 
                 // Load ignore patterns
                 const patterns = settings.ignorePatterns || [];
@@ -555,8 +555,8 @@ function saveSettings(settings) {
 
 function applyThemeSettings(settings) {
     // Apply background gradient
-    const startColor = settings.backgroundGradientStart || '#667eea';
-    const endColor = settings.backgroundGradientEnd || '#764ba2';
+    const startColor = settings.backgroundGradientStart || '#1a1a2e';
+    const endColor = settings.backgroundGradientEnd || '#16213e';
     const backgroundStyle = `linear-gradient(135deg, ${startColor} 0%, ${endColor} 100%)`;
     document.body.style.background = backgroundStyle;
 }
