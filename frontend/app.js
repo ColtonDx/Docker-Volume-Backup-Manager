@@ -262,6 +262,7 @@ function displayJobs(jobs) {
                 </span>
             </td>
             <td class="actions-cell">
+                <button class="btn-sm btn-run" onclick="manualRunBackup('${job.id}')">Run</button>
                 <button class="btn-sm btn-edit" onclick="openEditModal('${job.id}')">Edit</button>
                 <button class="btn-sm btn-toggle" onclick="toggleJob('${job.id}')">
                     ${job.enabled ? 'Disable' : 'Enable'}
@@ -293,6 +294,12 @@ function displayJobs(jobs) {
 // Handle create backup
 async function handleCreateBackup(e) {
     e.preventDefault();
+
+    // Validate remote field if rclone is enabled
+    if (useRclone.checked && !remote.value.trim()) {
+        alert('Please enter an rclone remote name');
+        return;
+    }
 
     const freq = frequency.value;
     const schedule = getScheduleFromFrequency(freq, customCronInput.value);
@@ -372,6 +379,12 @@ async function handleEditBackup(e) {
     const freq = editFrequency.value;
     const schedule = getScheduleFromFrequency(freq, editCustomCronInput.value);
 
+    // Validate rclone remote if rclone is enabled
+    if (editUseRclone.checked && !editRemote.value.trim()) {
+        alert('Please enter an rclone remote name');
+        return;
+    }
+
     const jobData = {
         backupLabel: editBackupLabel.value,
         frequency: freq,
@@ -444,6 +457,23 @@ async function deleteJob(jobId) {
     } catch (error) {
         console.error('Error deleting job:', error);
         alert('Failed to delete job: ' + error.message);
+    }
+}
+
+// Manual run backup
+async function manualRunBackup(jobId) {
+    try {
+        const response = await fetch(`/api/jobs/${jobId}/run`, {
+            method: 'POST'
+        });
+
+        if (!response.ok) throw new Error('Failed to start backup');
+        
+        const result = await response.json();
+        alert(`Backup started for job: ${result.label}\nCheck logs for progress.`);
+    } catch (error) {
+        console.error('Error running backup:', error);
+        alert('Failed to start backup: ' + error.message);
     }
 }
 

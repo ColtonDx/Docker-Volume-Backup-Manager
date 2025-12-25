@@ -195,6 +195,56 @@ app.delete('/api/jobs/:id', (req, res) => {
   res.json({ message: 'Job deleted', job: deletedJob });
 });
 
+// Manual run backup job
+app.post('/api/jobs/:id/run', (req, res) => {
+  const jobs = loadJobs();
+  const job = jobs.find(j => j.id === req.params.id);
+  if (!job) return res.status(404).json({ error: 'Job not found' });
+
+  // Run the backup script immediately
+  globalSettings = loadSettings();
+  const ignorePattern = globalSettings.ignorePattern || '.';
+  
+  const args = [
+    job.backupLabel,
+    BACKUP_DIR,
+    RCLONE_CONFIG,
+    job.useRclone ? 'true' : 'false',
+    job.remote || '',
+    ignorePattern
+  ];
+
+  console.log(`[Manual Run] Starting backup for: ${job.backupLabel}`);
+  
+  const proc = spawn('bash', [BACKUP_SCRIPT, ...args]);
+  
+  let stdout = '';
+  let stderr = '';
+
+  proc.stdout.on('data', (data) => {
+    stdout += data.toString();
+    console.log(`[${job.backupLabel}] ${data.toString().trim()}`);
+  });
+
+  proc.stderr.on('data', (data) => {
+    stderr += data.toString();
+    console.error(`[${job.backupLabel}] Error: ${data.toString().trim()}`);
+  });
+
+  proc.on('close', (code) => {
+    console.log(`Manual backup "${job.backupLabel}" completed with exit code ${code}`);
+    if (code !== 0) {
+      console.error(`Manual backup failed for ${job.backupLabel}`);
+    }
+  });
+
+  res.json({ 
+    message: 'Backup started', 
+    label: job.backupLabel,
+    status: 'running'
+  });
+});
+
 // GET settings
 app.get('/api/settings', (req, res) => {
   const settings = loadSettings();

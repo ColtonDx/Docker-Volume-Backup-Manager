@@ -417,6 +417,15 @@ small {
     background: #c0392b;
 }
 
+.btn-sm.btn-run {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-sm.btn-run:hover {
+    background: #229954;
+}
+
 .job-card {
     background: #f8f9fa;
     border-left: 4px solid #667eea;
