@@ -8,6 +8,9 @@ const { spawn } = require('child_process');
 const app = express();
 const PORT = 3000;
 const DATA_FILE = path.join(__dirname, '../data/jobs.json');
+const BACKUP_SCRIPT = path.join(__dirname, './backup.sh');
+const BACKUP_DIR = '/backups';
+const RCLONE_CONFIG = '/rclone/rclone.conf';
 
 // Middleware
 app.use(bodyParser.json());
@@ -26,6 +29,23 @@ if (!fs.existsSync(DATA_FILE)) {
 
 // Store active cron jobs
 let activeJobs = {};
+let globalSettings = {};
+
+// Load global settings from localStorage equivalent (we'll use a settings.json file)
+const SETTINGS_FILE = path.join(__dirname, '../data/settings.json');
+
+function loadSettings() {
+  try {
+    if (fs.existsSync(SETTINGS_FILE)) {
+      const data = fs.readFileSync(SETTINGS_FILE, 'utf-8');
+      return JSON.parse(data);
+    }
+    return {};
+  } catch (err) {
+    console.error('Error reading settings file:', err);
+    return {};
+  }
+}
 
 // Load jobs on startup
 function loadJobs() {
@@ -58,15 +78,21 @@ function initCronJob(job) {
   const task = cron.schedule(job.schedule, () => {
     console.log(`[${new Date().toISOString()}] Starting backup: ${job.backupLabel}`);
     
-    // Execute the Docker volume backup script
-    // This is a placeholder - replace with your actual backup script
-    const backupScript = `
-      echo "Executing backup for: ${job.backupLabel}"
-      # Add your Docker volume backup commands here
-      # Example: docker run --rm -v volume_name:/data -v backup_location:/backup alpine tar -czf /backup/backup_$(date +%Y%m%d_%H%M%S).tar.gz /data
-    `;
+    // Get current settings for ignore pattern
+    globalSettings = loadSettings();
+    const ignorePattern = globalSettings.ignorePattern || '.';
+    
+    // Execute the backup script
+    const args = [
+      job.backupLabel,  // Label (used as docker label)
+      BACKUP_DIR,
+      RCLONE_CONFIG,
+      job.useRclone ? 'true' : 'false',
+      job.remote || '',
+      ignorePattern
+    ];
 
-    const proc = spawn('bash', ['-c', backupScript]);
+    const proc = spawn('bash', [BACKUP_SCRIPT, ...args]);
     
     let stdout = '';
     let stderr = '';
@@ -116,6 +142,8 @@ app.post('/api/jobs', (req, res) => {
     frequency: req.body.frequency,
     schedule: req.body.schedule,
     enabled: req.body.enabled !== false,
+    useRclone: req.body.useRclone || false,
+    remote: req.body.remote || '',
     createdAt: new Date().toISOString()
   };
 
@@ -137,7 +165,9 @@ app.put('/api/jobs/:id', (req, res) => {
     backupLabel: req.body.backupLabel,
     frequency: req.body.frequency,
     schedule: req.body.schedule,
-    enabled: req.body.enabled !== false
+    enabled: req.body.enabled !== false,
+    useRclone: req.body.useRclone || false,
+    remote: req.body.remote || ''
   };
 
   jobs[jobIndex] = updatedJob;
@@ -165,9 +195,29 @@ app.delete('/api/jobs/:id', (req, res) => {
   res.json({ message: 'Job deleted', job: deletedJob });
 });
 
+// GET settings
+app.get('/api/settings', (req, res) => {
+  const settings = loadSettings();
+  res.json(settings);
+});
+
+// SAVE settings
+app.post('/api/settings', (req, res) => {
+  try {
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(req.body, null, 2));
+    globalSettings = req.body;
+    res.json({ message: 'Settings saved', settings: req.body });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save settings', details: err.message });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Cron Job Scheduler running on http://localhost:${PORT}`);
+  
+  // Load global settings
+  globalSettings = loadSettings();
   
   // Load and schedule all enabled jobs
   const jobs = loadJobs();

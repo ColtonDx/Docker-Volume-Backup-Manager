@@ -26,6 +26,7 @@ const settingsForm = document.getElementById('settingsForm');
 const settingsClose = document.getElementById('settingsClose');
 const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
 const backupNameSchema = document.getElementById('backupNameSchema');
+const ignorePattern = document.getElementById('ignorePattern');
 const schemaPreview = document.getElementById('schemaPreview');
 
 // DOM elements - Edit Modal
@@ -36,6 +37,9 @@ const editBackupLabel = document.getElementById('editBackupLabel');
 const editFrequency = document.getElementById('editFrequency');
 const editCustomCronInput = document.getElementById('editCustomCron');
 const editCustomCronGroup = document.getElementById('editCustomCronGroup');
+const editUseRclone = document.getElementById('editUseRclone');
+const editRemote = document.getElementById('editRemote');
+const editRemoteGroup = document.getElementById('editRemoteGroup');
 const editEnabled = document.getElementById('editEnabled');
 const closeModalBtn = document.querySelector('.close');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
@@ -71,6 +75,7 @@ document.addEventListener('click', (e) => {
 
 // Form input handlers
 useRclone.addEventListener('change', handleRcloneToggle);
+editUseRclone.addEventListener('change', handleEditRcloneToggle);
 
 // Other event listeners
 settingsForm.addEventListener('submit', handleSaveSettings);
@@ -82,8 +87,29 @@ closeModalBtn.addEventListener('click', closeEditModal);
 cancelEditBtn.addEventListener('click', closeEditModal);
 
 // Initialize
-loadSettings();
-loadAndDisplayJobs();
+async function initialize() {
+    try {
+        // Load settings from backend
+        const settingsResponse = await fetch('/api/settings');
+        if (settingsResponse.ok) {
+            const backendSettings = await settingsResponse.json();
+            if (backendSettings.backupNameSchema) {
+                backupNameSchema.value = backendSettings.backupNameSchema;
+            }
+            if (backendSettings.ignorePattern) {
+                ignorePattern.value = backendSettings.ignorePattern;
+            }
+            updateSchemaPreview();
+        }
+    } catch (err) {
+        console.log('Note: Settings will use defaults. Backend settings not available yet.');
+        loadSettings(); // Fall back to localStorage
+    }
+    
+    loadAndDisplayJobs();
+}
+
+initialize();
 
 // Toggle settings menu dropdown
 function toggleSettingsMenu() {
@@ -139,6 +165,17 @@ function handleEditFrequencyChange() {
     } else {
         editCustomCronGroup.classList.add('hidden');
         editCustomCronInput.required = false;
+    }
+}
+
+// Handle edit rclone toggle
+function handleEditRcloneToggle() {
+    if (editUseRclone.checked) {
+        editRemoteGroup.classList.remove('hidden');
+        editRemote.required = true;
+    } else {
+        editRemoteGroup.classList.add('hidden');
+        editRemote.required = false;
     }
 }
 
@@ -283,12 +320,20 @@ async function openEditModal(jobId) {
         editBackupLabel.value = job.backupLabel;
         editFrequency.value = job.frequency;
         editEnabled.checked = job.enabled;
+        editUseRclone.checked = job.useRclone || false;
+        editRemote.value = job.remote || '';
 
         if (job.frequency === 'custom') {
             editCustomCronInput.value = job.schedule;
             editCustomCronGroup.classList.remove('hidden');
         } else {
             editCustomCronGroup.classList.add('hidden');
+        }
+
+        if (job.useRclone) {
+            editRemoteGroup.classList.remove('hidden');
+        } else {
+            editRemoteGroup.classList.add('hidden');
         }
 
         editModal.classList.remove('hidden');
@@ -310,7 +355,9 @@ async function handleEditBackup(e) {
         backupLabel: editBackupLabel.value,
         frequency: freq,
         schedule: schedule,
-        enabled: editEnabled.checked
+        enabled: editEnabled.checked,
+        useRclone: editUseRclone.checked,
+        remote: editUseRclone.checked ? editRemote.value : ''
     };
 
     try {
@@ -397,8 +444,10 @@ function loadSettings() {
     if (saved) {
         const settings = JSON.parse(saved);
         backupNameSchema.value = settings.backupNameSchema || 'backup_{label}_{date}';
+        ignorePattern.value = settings.ignorePattern || '';
     } else {
         backupNameSchema.value = 'backup_{label}_{date}';
+        ignorePattern.value = '';
     }
     updateSchemaPreview();
 }
@@ -431,11 +480,28 @@ function closeSettingsModal() {
 async function handleSaveSettings(e) {
     e.preventDefault();
     const settings = {
-        backupNameSchema: backupNameSchema.value
+        backupNameSchema: backupNameSchema.value,
+        ignorePattern: ignorePattern.value
     };
-    saveSettings(settings);
-    closeSettingsModal();
-    alert('Settings saved successfully!');
+    
+    try {
+        // Save to backend
+        const response = await fetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(settings)
+        });
+
+        if (!response.ok) throw new Error('Failed to save settings');
+
+        // Also save to localStorage for UI state
+        saveSettings(settings);
+        closeSettingsModal();
+        alert('Settings saved successfully!');
+    } catch (error) {
+        console.error('Error saving settings:', error);
+        alert('Failed to save settings. Please try again.');
+    }
 }
 
 // Auto-reload jobs every 10 seconds

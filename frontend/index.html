@@ -123,6 +123,19 @@
 
                 <div class="form-group">
                     <label>
+                        <input type="checkbox" id="editUseRclone">
+                        Use Rclone for remote backup
+                    </label>
+                </div>
+
+                <div class="form-group hidden" id="editRemoteGroup">
+                    <label for="editRemote">Rclone Remote:</label>
+                    <input type="text" id="editRemote" placeholder="e.g., s3, gdrive, azure" required>
+                    <small>The rclone remote to backup to</small>
+                </div>
+
+                <div class="form-group">
+                    <label>
                         <input type="checkbox" id="editEnabled">
                         Enable this backup schedule
                     </label>
@@ -152,6 +165,12 @@
 
                 <div class="form-group">
                     <p><strong>Example:</strong> <span id="schemaPreview">backup_myvolume_20251224</span></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="ignorePattern">Ignore Volume Pattern (Regex):</label>
+                    <input type="text" id="ignorePattern" placeholder="e.g., ^temp_|_cache$ (regex pattern)">
+                    <small>Volumes matching this regex pattern will be excluded from backups</small>
                 </div>
 
                 <div class="modal-buttons">
