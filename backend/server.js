@@ -58,6 +58,36 @@ function loadJobs() {
   }
 }
 
+// Rotate old backups for a job (keep only specified number of local backups)
+function rotateBackups(job) {
+  if (job.useRclone || !job.retentionCount || job.retentionCount <= 0) {
+    return; // Only rotate for local backups
+  }
+
+  try {
+    const files = fs.readdirSync(BACKUP_DIR)
+      .filter(file => file.startsWith(job.backupLabel + '-') && file.endsWith('.tar.gz'))
+      .sort()
+      .reverse(); // Most recent first
+
+    // Delete old backups beyond retention count
+    if (files.length > job.retentionCount) {
+      const filesToDelete = files.slice(job.retentionCount);
+      filesToDelete.forEach(file => {
+        const filePath = path.join(BACKUP_DIR, file);
+        try {
+          fs.unlinkSync(filePath);
+          console.log(`[Rotation] Deleted old backup: ${file}`);
+        } catch (err) {
+          console.error(`[Rotation] Failed to delete ${file}:`, err);
+        }
+      });
+    }
+  } catch (err) {
+    console.error(`[Rotation] Error rotating backups for ${job.backupLabel}:`, err);
+  }
+}
+
 // Save jobs to file
 function saveJobs(jobs) {
   try {
@@ -112,6 +142,9 @@ function initCronJob(job) {
       console.log(`Backup "${job.backupLabel}" completed with exit code ${code}`);
       if (code !== 0) {
         console.error(`Backup failed for ${job.backupLabel}`);
+      } else {
+        // Rotate backups to keep only specified number
+        rotateBackups(job);
       }
     });
   });
@@ -145,6 +178,7 @@ app.post('/api/jobs', (req, res) => {
     enabled: req.body.enabled !== false,
     useRclone: req.body.useRclone || false,
     remote: req.body.remote || '',
+    retentionCount: req.body.retentionCount || 5,
     createdAt: new Date().toISOString()
   };
 
@@ -168,7 +202,8 @@ app.put('/api/jobs/:id', (req, res) => {
     schedule: req.body.schedule,
     enabled: req.body.enabled !== false,
     useRclone: req.body.useRclone || false,
-    remote: req.body.remote || ''
+    remote: req.body.remote || '',
+    retentionCount: req.body.retentionCount || 5
   };
 
   jobs[jobIndex] = updatedJob;
@@ -237,6 +272,9 @@ app.post('/api/jobs/:id/run', (req, res) => {
     console.log(`Manual backup "${job.backupLabel}" completed with exit code ${code}`);
     if (code !== 0) {
       console.error(`Manual backup failed for ${job.backupLabel}`);
+    } else {
+      // Rotate backups to keep only specified number
+      rotateBackups(job);
     }
   });
 

@@ -17,7 +17,8 @@ const frequency = document.getElementById('frequency');
 const customCronInput = document.getElementById('customCron');
 const customCronGroup = document.getElementById('customCronGroup');
 const enabledCheckbox = document.getElementById('enabled');
-const jobsList = document.getElementById('jobsList');
+const retentionCount = document.getElementById('retentionCount');
+const retentionGroup = document.getElementById('retentionGroup');
 
 // DOM elements - Settings
 const settingsBtn = document.getElementById('settingsBtn');
@@ -58,6 +59,8 @@ const editUseRclone = document.getElementById('editUseRclone');
 const editRemote = document.getElementById('editRemote');
 const editRemoteGroup = document.getElementById('editRemoteGroup');
 const editEnabled = document.getElementById('editEnabled');
+const editRetentionCount = document.getElementById('editRetentionCount');
+const editRetentionGroup = document.getElementById('editRetentionGroup');
 const closeModalBtn = document.querySelector('.close');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
 
@@ -170,9 +173,11 @@ function handleRcloneToggle() {
     if (useRclone.checked) {
         remoteGroup.classList.remove('hidden');
         remote.required = true;
+        retentionGroup.classList.add('hidden');
     } else {
         remoteGroup.classList.add('hidden');
         remote.required = false;
+        retentionGroup.classList.remove('hidden');
     }
 }
 
@@ -192,9 +197,11 @@ function handleEditRcloneToggle() {
     if (editUseRclone.checked) {
         editRemoteGroup.classList.remove('hidden');
         editRemote.required = true;
+        editRetentionGroup.classList.add('hidden');
     } else {
         editRemoteGroup.classList.add('hidden');
         editRemote.required = false;
+        editRetentionGroup.classList.remove('hidden');
     }
 }
 
@@ -308,7 +315,8 @@ async function handleCreateBackup(e) {
         schedule: schedule,
         enabled: enabledCheckbox.checked,
         useRclone: useRclone.checked,
-        remote: useRclone.checked ? remote.value : ''
+        remote: useRclone.checked ? remote.value : '',
+        retentionCount: useRclone.checked ? 0 : parseInt(retentionCount.value) || 5
     };
 
     try {
@@ -348,6 +356,8 @@ async function openEditModal(jobId) {
         editEnabled.checked = job.enabled;
         editUseRclone.checked = job.useRclone || false;
         editRemote.value = job.remote || '';
+        editRetentionCount.value = job.retentionCount || 5;
+        editRetentionCount.value = job.retentionCount || 5;
 
         if (job.frequency === 'custom') {
             editCustomCronInput.value = job.schedule;
@@ -389,7 +399,8 @@ async function handleEditBackup(e) {
         schedule: schedule,
         enabled: editEnabled.checked,
         useRclone: editUseRclone.checked,
-        remote: editUseRclone.checked ? editRemote.value : ''
+        remote: editUseRclone.checked ? editRemote.value : '',
+        retentionCount: editUseRclone.checked ? 0 : parseInt(editRetentionCount.value) || 5
     };
 
     try {

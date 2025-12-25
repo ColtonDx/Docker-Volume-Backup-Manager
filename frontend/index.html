@@ -55,6 +55,12 @@
                         <small>The rclone remote to backup to</small>
                     </div>
 
+                    <div class="form-group" id="retentionGroup">
+                        <label for="retentionCount">Keep Backups:</label>
+                        <input type="number" id="retentionCount" min="1" max="100" value="5" placeholder="Number of backups to keep">
+                        <small>Number of backups to keep locally (oldest will be deleted). Not applicable for rclone backups.</small>
+                    </div>
+
                     <div class="form-group">
                         <label for="frequency">Backup Frequency:</label>
                         <select id="frequency" required>
@@ -132,6 +138,12 @@
                     <label for="editRemote">Rclone Remote:</label>
                     <input type="text" id="editRemote" placeholder="e.g., s3, gdrive, azure">
                     <small>The rclone remote to backup to</small>
+                </div>
+
+                <div class="form-group" id="editRetentionGroup">
+                    <label for="editRetentionCount">Keep Backups:</label>
+                    <input type="number" id="editRetentionCount" min="1" max="100" value="5" placeholder="Number of backups to keep">
+                    <small>Number of backups to keep locally (oldest will be deleted). Not applicable for rclone backups.</small>
                 </div>
 
                 <div class="form-group">
