@@ -79,7 +79,7 @@ declare -A VOLUMES_TO_BACKUP
 
 for container_id in $CONTAINERS; do
     # Get mounts for this container
-    docker inspect "$container_id" | jq -r '.Mounts[] | select(.Type=="volume") | .Name' | while read -r volume_name; do
+    docker inspect "$container_id" | jq -r '.[0].Mounts[] | select(.Type=="volume") | .Name' | while read -r volume_name; do
         if ! should_ignore "$volume_name"; then
             VOLUMES_TO_BACKUP["$volume_name"]=1
         fi
@@ -91,7 +91,7 @@ echo "Backing up volumes..."
 volume_count=0
 for container_id in $CONTAINERS; do
     # Get mounts for this container
-    docker inspect "$container_id" | jq -r '.Mounts[] | select(.Type=="volume") | "\(.Name)|\(.Destination)"' | while read -r mount_info; do
+    docker inspect "$container_id" | jq -r '.[0].Mounts[] | select(.Type=="volume") | "\(.Name)|\(.Destination)"' | while read -r mount_info; do
         IFS='|' read -r volume_name dest_path <<< "$mount_info"
         
         # Skip if pattern matches ignore list
