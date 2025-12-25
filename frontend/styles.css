@@ -719,6 +719,24 @@ small {
     width: 100%;
 }
 
+/* Confirm Modal */
+.confirm-modal {
+    max-width: 400px;
+    text-align: center;
+}
+
+.confirm-modal h2 {
+    margin-bottom: 15px;
+    color: #e0e0e0;
+}
+
+.confirm-modal p {
+    margin-bottom: 25px;
+    color: #b0b0b0;
+    font-size: 1em;
+    line-height: 1.5;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     main {

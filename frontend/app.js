@@ -64,6 +64,13 @@ const editRetentionGroup = document.getElementById('editRetentionGroup');
 const closeModalBtn = document.querySelector('.close');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
 
+// DOM elements - Confirm Modal
+const confirmModal = document.getElementById('confirmModal');
+const confirmTitle = document.getElementById('confirmTitle');
+const confirmMessage = document.getElementById('confirmMessage');
+const confirmYes = document.getElementById('confirmYes');
+const confirmNo = document.getElementById('confirmNo');
+
 // Frequency to cron mapping
 const frequencyMap = {
     'hourly': '0 * * * *',
@@ -441,6 +448,35 @@ function closeEditModal() {
     editForm.reset();
 }
 
+// Show confirmation modal
+function showConfirm(message, title = 'Confirm Action') {
+    return new Promise((resolve) => {
+        confirmTitle.textContent = title;
+        confirmMessage.textContent = message;
+        confirmModal.classList.remove('hidden');
+        confirmModal.classList.add('visible');
+        
+        const handleYes = () => {
+            confirmModal.classList.remove('visible');
+            confirmModal.classList.add('hidden');
+            confirmYes.removeEventListener('click', handleYes);
+            confirmNo.removeEventListener('click', handleNo);
+            resolve(true);
+        };
+        
+        const handleNo = () => {
+            confirmModal.classList.remove('visible');
+            confirmModal.classList.add('hidden');
+            confirmYes.removeEventListener('click', handleYes);
+            confirmNo.removeEventListener('click', handleNo);
+            resolve(false);
+        };
+        
+        confirmYes.addEventListener('click', handleYes);
+        confirmNo.addEventListener('click', handleNo);
+    });
+}
+
 // Toggle job enabled/disabled
 async function toggleJob(jobId) {
     try {
@@ -467,7 +503,8 @@ async function toggleJob(jobId) {
 
 // Delete job
 async function deleteJob(jobId) {
-    if (!confirm('Are you sure you want to delete this backup schedule?')) return;
+    const confirmed = await showConfirm('Are you sure you want to delete this backup schedule?');
+    if (!confirmed) return;
 
     try {
         const response = await fetch(`${API_URL}/${jobId}`, {
