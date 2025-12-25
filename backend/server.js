@@ -134,10 +134,10 @@ app.put('/api/jobs/:id', (req, res) => {
 
   const updatedJob = {
     ...jobs[jobIndex],
-    name: req.body.name,
     backupLabel: req.body.backupLabel,
     frequency: req.body.frequency,
-    schedule: req.body.schedule false
+    schedule: req.body.schedule,
+    enabled: req.body.enabled !== false
   };
 
   jobs[jobIndex] = updatedJob;
