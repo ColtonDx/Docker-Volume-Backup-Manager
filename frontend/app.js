@@ -105,6 +105,7 @@ function showFormSection() {
 function hideFormSection() {
     formSection.classList.add('hidden');
     jobForm.reset();
+    remoteGroup.classList.add('hidden');
     customCronGroup.classList.add('hidden');
 }
 

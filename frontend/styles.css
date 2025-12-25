@@ -238,7 +238,11 @@ small {
     width: 100%;
 }
 
-.
+.btn-primary:hover {
+    background: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
 
 .jobs-header {
     display: flex;
@@ -257,10 +261,6 @@ small {
     margin-top: 20px;
     padding-top: 20px;
     border-top: 1px solid #eee;
-}
-    background: #5568d3;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
 .btn-secondary {
@@ -661,8 +661,6 @@ small {
 
 .hidden {
     display: none !important;
-}   padding: 40px 20px;
-    color: #999;
 }
 
 .empty-state p {
