@@ -99,21 +99,13 @@ header h1 {
 
 main {
     display: grid;
-    grid-template-columns:
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
 }
 
 header p {
     font-size: 1.1em;
     opacity: 0.9;
-}
-
-main {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
 }
 
 section {

@@ -669,8 +669,6 @@ async function handleRestoreBackup() {
         alert('Failed to restore backup: ' + error.message);
     }
 }
-    closeRestoreModal();
-}
 
 // Auto-reload jobs every 10 seconds
 setInterval(loadAndDisplayJobs, 10000);
