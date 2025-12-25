@@ -27,9 +27,6 @@ const settingsClose = document.getElementById('settingsClose');
 const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
 const backupNameSchema = document.getElementById('backupNameSchema');
 const darkModeToggle = document.getElementById('darkModeToggle');
-const backgroundGradientStart = document.getElementById('backgroundGradientStart');
-const backgroundGradientEnd = document.getElementById('backgroundGradientEnd');
-const backgroundImage = document.getElementById('backgroundImage');
 const ignorePatternsList = document.getElementById('ignorePatternsList');
 const addPatternBtn = document.getElementById('addPatternBtn');
 const rcloneConfig = document.getElementById('rcloneConfig');
@@ -108,6 +105,7 @@ editUseRclone.addEventListener('change', handleEditRcloneToggle);
 // Other event listeners
 settingsForm.addEventListener('submit', handleSaveSettings);
 backupNameSchema.addEventListener('input', updateSchemaPreview);
+darkModeToggle.addEventListener('change', handleDarkModeToggle);
 
 editFrequency.addEventListener('change', handleEditFrequencyChange);
 editForm.addEventListener('submit', handleEditBackup);
@@ -500,9 +498,6 @@ function loadSettings() {
                 
                 // Load theme settings
                 darkModeToggle.checked = settings.darkMode || false;
-                backgroundGradientStart.value = settings.backgroundGradientStart || '#667eea';
-                backgroundGradientEnd.value = settings.backgroundGradientEnd || '#764ba2';
-                backgroundImage.value = settings.backgroundImage || '';
                 
                 // Load ignore patterns
                 const patterns = settings.ignorePatterns || [];
@@ -564,24 +559,14 @@ function applyThemeSettings(settings) {
     } else {
         document.body.classList.remove('dark-mode');
     }
+}
 
-    // Apply background gradient
-    const startColor = settings.backgroundGradientStart || '#667eea';
-    const endColor = settings.backgroundGradientEnd || '#764ba2';
-    let backgroundStyle = `linear-gradient(135deg, ${startColor} 0%, ${endColor} 100%)`;
-
-    // Apply background image if provided
-    if (settings.backgroundImage && settings.backgroundImage.trim()) {
-        backgroundStyle = `
-            url('${settings.backgroundImage}'),
-            linear-gradient(135deg, ${startColor} 0%, ${endColor} 100%)
-        `;
-        document.body.style.backgroundSize = 'cover, cover';
-        document.body.style.backgroundPosition = 'center, center';
-        document.body.style.backgroundAttachment = 'fixed, fixed';
+function handleDarkModeToggle() {
+    if (darkModeToggle.checked) {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
     }
-
-    document.body.style.background = backgroundStyle;
 }
 
 function updateSchemaPreview() {
@@ -618,9 +603,6 @@ async function handleSaveSettings(e) {
     const settings = {
         backupNameSchema: backupNameSchema.value,
         darkMode: darkModeToggle.checked,
-        backgroundGradientStart: backgroundGradientStart.value,
-        backgroundGradientEnd: backgroundGradientEnd.value,
-        backgroundImage: backgroundImage.value,
         ignorePatterns: ignorePatterns,
         rcloneConfig: rcloneConfig.value
     };
