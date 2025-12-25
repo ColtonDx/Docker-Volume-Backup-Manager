@@ -174,10 +174,12 @@ function handleRcloneToggle() {
         remoteGroup.classList.remove('hidden');
         remote.required = true;
         retentionGroup.classList.add('hidden');
+        retentionCount.disabled = true;
     } else {
         remoteGroup.classList.add('hidden');
         remote.required = false;
         retentionGroup.classList.remove('hidden');
+        retentionCount.disabled = false;
     }
 }
 
@@ -198,10 +200,12 @@ function handleEditRcloneToggle() {
         editRemoteGroup.classList.remove('hidden');
         editRemote.required = true;
         editRetentionGroup.classList.add('hidden');
+        editRetentionCount.disabled = true;
     } else {
         editRemoteGroup.classList.add('hidden');
         editRemote.required = false;
         editRetentionGroup.classList.remove('hidden');
+        editRetentionCount.disabled = false;
     }
 }
 
