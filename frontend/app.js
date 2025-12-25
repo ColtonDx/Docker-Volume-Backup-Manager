@@ -187,7 +187,7 @@ function handleRcloneToggle() {
         remoteGroup.classList.remove('hidden');
         remote.required = false;
         retentionGroup.classList.remove('hidden');
-        retentionCount.disabled = true;
+        retentionCount.disabled = false;
     }
 }
 
