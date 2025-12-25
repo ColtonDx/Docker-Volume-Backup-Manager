@@ -13,7 +13,8 @@ REMOTE="$5"
 IGNORE_PATTERN="${6:-.}"  # Default to empty pattern (match nothing)
 
 # Setup logging
-LOG_FILE="/data/backups.log"
+LOG_FILE="/app/data/backups.log"
+mkdir -p /app/data
 {
 
 # Validate inputs
