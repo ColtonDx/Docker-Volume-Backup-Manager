@@ -101,10 +101,11 @@ for container_id in $CONTAINERS; do
         VOLUME_DATA_PATH="/var/lib/docker/volumes/${volume_name}/_data"
         
         if [[ -d "$VOLUME_DATA_PATH" ]]; then
-            # Tar the actual volume data
+            # Copy volume data to backup subdirectory
             mkdir -p "$BACKUP_SUBDIR/$volume_name"
-            tar -cf - -C "$VOLUME_DATA_PATH" . 2>/dev/null | tar xf - -C "$BACKUP_SUBDIR/$volume_name" 2>/dev/null || true
+            cp -r "$VOLUME_DATA_PATH"/* "$BACKUP_SUBDIR/$volume_name/" 2>/dev/null || echo "  Warning: Some files could not be copied"
             volume_count=$((volume_count + 1))
+            echo "  Volume backed up successfully"
         else
             echo "Warning: Volume data path not found for $volume_name at $VOLUME_DATA_PATH"
         fi
@@ -116,7 +117,12 @@ echo "Backed up $volume_count volumes"
 # Create final tar archive with new naming convention
 BACKUP_FILE="$BACKUP_DIR/${LABEL}-$(date +%Y%m%d_%H%M%S).tar.gz"
 echo "Creating archive: $BACKUP_FILE"
-tar -czf "$BACKUP_FILE" -C "$BACKUP_DIR" "${LABEL}_${TIMESTAMP}" 2>/dev/null || true
+if [[ -d "$BACKUP_SUBDIR" && $(find "$BACKUP_SUBDIR" -type f | wc -l) -gt 0 ]]; then
+    tar -czf "$BACKUP_FILE" -C "$BACKUP_DIR" "${LABEL}_${TIMESTAMP}"
+    echo "Archive created successfully with size: $(du -h "$BACKUP_FILE" | cut -f1)"
+else
+    echo "Warning: No files found to archive"
+fi
 
 # Remove the temporary directory
 rm -rf "$BACKUP_SUBDIR"
