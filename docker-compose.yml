@@ -9,9 +9,9 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./data:/app/data
-      - ./rclone.conf:/rclone/rclone.conf:ro
-      - ./backups:/backups
+      - /backups:/app/data
+      - /backups:/rclone/rclone.conf:ro
+      - /backups:/backups
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - NODE_ENV=production
