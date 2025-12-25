@@ -145,16 +145,22 @@ function closeSettingsMenu() {
 
 // Show form section
 function showFormSection() {
+    remote.disabled = true;
+    useRclone.checked = false;
+    retentionCount.disabled = false;
     formSection.classList.remove('hidden');
     formSection.scrollIntoView({ behavior: 'smooth' });
-}
+}}
 
 // Hide form section
 function hideFormSection() {
     formSection.classList.add('hidden');
     jobForm.reset();
+    remote.disabled = true;
     remoteGroup.classList.add('hidden');
     customCronGroup.classList.add('hidden');
+    retentionGroup.classList.remove('hidden');
+    retentionCount.disabled = false;
 }
 
 // Handle frequency change to show/hide custom cron input
