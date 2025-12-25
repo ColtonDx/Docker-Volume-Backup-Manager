@@ -773,7 +773,14 @@ small {
     font-weight: 600;
     z-index: 2000;
     max-width: 300px;
-    animation: slideIn 0.3s ease;
+    transform: translateY(150px);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.notification:not(.hidden) {
+    transform: translateY(0);
+    opacity: 1;
 }
 
 .notification.success {
@@ -785,18 +792,8 @@ small {
 }
 
 .notification.hidden {
-    display: none !important;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(400px);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+    transform: translateY(150px);
+    opacity: 0;
 }
 
 /* Settings fieldsets */
