@@ -336,6 +336,82 @@ app.get('/api/backups/remote/:label/:remote', (req, res) => {
   }
 });
 
+// Restore from backup
+app.post('/api/restore', (req, res) => {
+  const { label, backupFile, isRemote, remote } = req.body;
+
+  if (!label || !backupFile) {
+    return res.status(400).json({ error: 'Missing required parameters' });
+  }
+
+  console.log(`[Restore] Starting restore for: ${label}`);
+  
+  let backupPath = backupFile;
+  
+  // If restoring from remote, download it first
+  if (isRemote && remote) {
+    console.log(`[Restore] Downloading from remote: ${remote}`);
+    
+    const proc = spawn('rclone', [
+      'copy',
+      `${remote}:/${backupFile}`,
+      BACKUP_DIR,
+      '--config=' + RCLONE_CONFIG
+    ]);
+
+    let stderr = '';
+    proc.stderr.on('data', (data) => {
+      stderr += data.toString();
+      console.error(`[Restore] rclone error: ${data.toString().trim()}`);
+    });
+
+    proc.on('close', (code) => {
+      if (code !== 0) {
+        console.error(`[Restore] rclone failed with exit code ${code}`);
+        return res.status(500).json({ error: 'Failed to download backup from remote' });
+      }
+      
+      backupPath = path.join(BACKUP_DIR, backupFile);
+      startRestore(label, backupPath, res);
+    });
+  } else {
+    backupPath = path.join(BACKUP_DIR, backupFile);
+    startRestore(label, backupPath, res);
+  }
+});
+
+function startRestore(label, backupPath, res) {
+  const restoreScript = path.join(__dirname, './restore.sh');
+  const proc = spawn('bash', [restoreScript, label, backupPath, BACKUP_DIR]);
+
+  let stdout = '';
+  let stderr = '';
+
+  proc.stdout.on('data', (data) => {
+    stdout += data.toString();
+    console.log(`[${label}] ${data.toString().trim()}`);
+  });
+
+  proc.stderr.on('data', (data) => {
+    stderr += data.toString();
+    console.error(`[${label}] Error: ${data.toString().trim()}`);
+  });
+
+  proc.on('close', (code) => {
+    console.log(`Restore for "${label}" completed with exit code ${code}`);
+    if (code !== 0) {
+      console.error(`Restore failed for ${label}`);
+      res.status(500).json({ error: 'Restore failed', details: stderr });
+    } else {
+      res.json({ 
+        message: 'Restore completed successfully',
+        label: label,
+        stdout: stdout
+      });
+    }
+  });
+}
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Cron Job Scheduler running on http://localhost:${PORT}`);

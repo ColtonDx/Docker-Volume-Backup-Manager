@@ -640,8 +640,35 @@ async function handleRestoreBackup() {
     
     const labelItem = JSON.parse(restoreLabelSelect.value);
     
-    // TODO: Implement actual restore functionality
-    alert(`Would restore: ${backupFile}\nLabel: ${labelItem.label}\nFrom: ${labelItem.useRclone ? labelItem.remote : 'local storage'}`);
+    if (!confirm(`Are you sure you want to restore from ${backupFile}?\n\nThis will:\n1. Stop containers with label: ${labelItem.label}\n2. Clear existing volume contents\n3. Restore from backup\n\nProceed?`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/restore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                label: labelItem.label,
+                backupFile: backupFile,
+                isRemote: labelItem.useRclone || false,
+                remote: labelItem.remote || ''
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.details || error.error);
+        }
+        
+        const result = await response.json();
+        alert(`Restore completed successfully!\n\nLabel: ${result.label}`);
+        closeRestoreModal();
+    } catch (error) {
+        console.error('Error restoring backup:', error);
+        alert('Failed to restore backup: ' + error.message);
+    }
+}
     closeRestoreModal();
 }
 
