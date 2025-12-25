@@ -26,7 +26,8 @@ const settingsForm = document.getElementById('settingsForm');
 const settingsClose = document.getElementById('settingsClose');
 const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
 const backupNameSchema = document.getElementById('backupNameSchema');
-const darkModeToggle = document.getElementById('darkModeToggle');
+const backgroundGradientStart = document.getElementById('backgroundGradientStart');
+const backgroundGradientEnd = document.getElementById('backgroundGradientEnd');
 const ignorePatternsList = document.getElementById('ignorePatternsList');
 const addPatternBtn = document.getElementById('addPatternBtn');
 const rcloneConfig = document.getElementById('rcloneConfig');
@@ -105,7 +106,6 @@ editUseRclone.addEventListener('change', handleEditRcloneToggle);
 // Other event listeners
 settingsForm.addEventListener('submit', handleSaveSettings);
 backupNameSchema.addEventListener('input', updateSchemaPreview);
-darkModeToggle.addEventListener('change', handleDarkModeToggle);
 
 editFrequency.addEventListener('change', handleEditFrequencyChange);
 editForm.addEventListener('submit', handleEditBackup);
@@ -497,7 +497,8 @@ function loadSettings() {
                 backupNameSchema.value = settings.backupNameSchema || 'backup_{label}_{date}';
                 
                 // Load theme settings
-                darkModeToggle.checked = settings.darkMode || false;
+                backgroundGradientStart.value = settings.backgroundGradientStart || '#667eea';
+                backgroundGradientEnd.value = settings.backgroundGradientEnd || '#764ba2';
                 
                 // Load ignore patterns
                 const patterns = settings.ignorePatterns || [];
@@ -553,20 +554,11 @@ function saveSettings(settings) {
 }
 
 function applyThemeSettings(settings) {
-    // Apply dark mode
-    if (settings.darkMode) {
-        document.body.classList.add('dark-mode');
-    } else {
-        document.body.classList.remove('dark-mode');
-    }
-}
-
-function handleDarkModeToggle() {
-    if (darkModeToggle.checked) {
-        document.body.classList.add('dark-mode');
-    } else {
-        document.body.classList.remove('dark-mode');
-    }
+    // Apply background gradient
+    const startColor = settings.backgroundGradientStart || '#667eea';
+    const endColor = settings.backgroundGradientEnd || '#764ba2';
+    const backgroundStyle = `linear-gradient(135deg, ${startColor} 0%, ${endColor} 100%)`;
+    document.body.style.background = backgroundStyle;
 }
 
 function updateSchemaPreview() {
@@ -602,7 +594,8 @@ async function handleSaveSettings(e) {
     
     const settings = {
         backupNameSchema: backupNameSchema.value,
-        darkMode: darkModeToggle.checked,
+        backgroundGradientStart: backgroundGradientStart.value,
+        backgroundGradientEnd: backgroundGradientEnd.value,
         ignorePatterns: ignorePatterns,
         rcloneConfig: rcloneConfig.value
     };
