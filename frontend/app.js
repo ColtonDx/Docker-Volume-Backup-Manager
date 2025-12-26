@@ -854,6 +854,9 @@ async function openRestoreModal() {
         restoreBackupBtn.disabled = false;
         restoreBackupBtn.textContent = 'Restore';
         restoreBackBtn.disabled = false;
+        // Reset close/cancel states
+        restoreCloseBtn.disabled = false;
+        restoreClose.classList.remove('disabled');
         
         // Show step 1
         restoreStep1.classList.remove('hidden');
@@ -876,6 +879,9 @@ function closeRestoreModal() {
     restoreBackupBtn.disabled = false;
     restoreBackupBtn.textContent = 'Restore';
     restoreBackBtn.disabled = false;
+    // Reset close/cancel states
+    restoreCloseBtn.disabled = false;
+    restoreClose.classList.remove('disabled');
 }
 
 async function handleRestoreLabelSelect() {
@@ -936,14 +942,6 @@ async function handleRestoreLabelSelect() {
             restoreLabelNextBtn.disabled = false;
             restoreLabelNextBtn.textContent = 'Next';
         alert('Failed to load backups: ' + error.message);
-        // Disable button and show restoring state
-        restoreBackupBtn.disabled = true;
-        restoreBackupBtn.textContent = 'Restoring...';
-        restoreBackBtn.disabled = true;
-    
-        restoreBackupBtn.disabled = false;
-        restoreBackupBtn.textContent = 'Restore';
-        restoreBackBtn.disabled = false;
     }
 }
 
@@ -970,6 +968,13 @@ async function handleRestoreBackup() {
         return;
     }
     
+    // Disable controls and show restoring state
+    restoreBackupBtn.disabled = true;
+    restoreBackupBtn.textContent = 'Restoring...';
+    restoreBackBtn.disabled = true;
+    restoreCloseBtn.disabled = true;
+    restoreClose.classList.add('disabled');
+    
     try {
         const response = await fetch('/api/restore', {
             method: 'POST',
@@ -995,6 +1000,8 @@ async function handleRestoreBackup() {
             restoreBackupBtn.disabled = false;
             restoreBackupBtn.textContent = 'Restore';
             restoreBackBtn.disabled = false;
+            restoreCloseBtn.disabled = false;
+            restoreClose.classList.remove('disabled');
         await showInfo('Failed to restore backup: ' + error.message, 'Restore Failed');
     }
 }
