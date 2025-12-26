@@ -147,6 +147,16 @@ cancelEditBtn.addEventListener('click', closeEditModal);
 
 // Initialize
 async function initialize() {
+    // Ensure all schedule detail groups start hidden
+    if (dailyTimeGroup) dailyTimeGroup.classList.add('hidden');
+    if (weeklyScheduleGroup) weeklyScheduleGroup.classList.add('hidden');
+    if (monthlyScheduleGroup) monthlyScheduleGroup.classList.add('hidden');
+    if (customCronGroup) customCronGroup.classList.add('hidden');
+    if (editDailyTimeGroup) editDailyTimeGroup.classList.add('hidden');
+    if (editWeeklyScheduleGroup) editWeeklyScheduleGroup.classList.add('hidden');
+    if (editMonthlyScheduleGroup) editMonthlyScheduleGroup.classList.add('hidden');
+    if (editCustomCronGroup) editCustomCronGroup.classList.add('hidden');
+    
     try {
         // Load settings from backend
         const settingsResponse = await fetch('/api/settings');
@@ -178,6 +188,7 @@ function showFormSection() {
     remote.disabled = true;
     useRclone.checked = false;
     retentionCount.disabled = false;
+    frequency.value = '';
     // Hide all schedule detail groups by default
     dailyTimeGroup.classList.add('hidden');
     weeklyScheduleGroup.classList.add('hidden');
