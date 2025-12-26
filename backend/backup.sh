@@ -27,6 +27,27 @@ fi
 # Create backup directory if it doesn't exist
 mkdir -p "$BACKUP_DIR"
 
+# Wildcard expansion: KEY=*
+if [[ "$LABEL" =~ ^([^=]+)=\*$ ]]; then
+  LABEL_KEY="${BASH_REMATCH[1]}"
+  echo "Wildcard job detected for key: $LABEL_KEY"
+  IDS=$(docker ps -a --filter "label=$LABEL_KEY" --format "{{.ID}}")
+  if [[ -z "$IDS" ]]; then
+    echo "No containers found with label key: $LABEL_KEY"
+    exit 0
+  fi
+  declare -A VALUES
+  for id in $IDS; do
+    val=$(docker inspect "$id" | jq -r ".[0].Config.Labels[\"$LABEL_KEY\"] // empty")
+    [[ -n "$val" ]] && VALUES["$val"]=1
+  done
+  for v in "${!VALUES[@]}"; do
+    echo "Running backup for ${LABEL_KEY}=${v}"
+    bash "$0" "${LABEL_KEY}=${v}" "$BACKUP_DIR" "$RCLONE_CONFIG" "$USE_RCLONE" "$REMOTE" "$IGNORE_PATTERN"
+  done
+  exit 0
+fi
+
 echo "Starting backup for label: $LABEL"
 echo "Backup directory: $BACKUP_DIR"
 echo "Use rclone: $USE_RCLONE"

@@ -344,8 +344,10 @@ app.get('/api/backups/labels', (req, res) => {
 app.get('/api/backups/local/:label', (req, res) => {
   try {
     const label = req.params.label;
+    const isWildcard = label.endsWith('=*');
+    const prefix = isWildcard ? label.slice(0, -1) : label + '-';
     const files = fs.readdirSync(BACKUP_DIR).filter(file => {
-      return file.startsWith(label + '-') && file.endsWith('.tar.gz');
+      return file.endsWith('.tar.gz') && file.startsWith(prefix);
     });
     res.json(files.sort().reverse()); // Most recent first
   } catch (err) {
@@ -395,10 +397,12 @@ app.get('/api/backups/remote/:label/:remote', (req, res) => {
       console.log(`[Remote Backups] Raw output length: ${output.length}`);
       
       // Parse rclone lsf output (which returns just filenames, one per line)
+      const isWildcard = label.endsWith('=*');
+      const prefix = isWildcard ? label.slice(0, -1) : label + '-';
       const files = output
         .split('\n')
         .map(line => line.trim())
-        .filter(file => file && file.startsWith(label + '-') && file.endsWith('.tar.gz'))
+        .filter(file => file && file.endsWith('.tar.gz') && file.startsWith(prefix))
         .sort()
         .reverse(); // Most recent first
 
@@ -418,10 +422,16 @@ app.get('/api/backups/remote/:label/:remote', (req, res) => {
 
 // Restore from backup
 app.post('/api/restore', (req, res) => {
-  const { label, backupFile, isRemote, remote } = req.body;
+  let { label, backupFile, isRemote, remote } = req.body;
 
-  if (!label || !backupFile) {
-    return res.status(400).json({ error: 'Missing required parameters' });
+  if (!backupFile) {
+    return res.status(400).json({ error: 'Missing backupFile' });
+  }
+
+  // Derive label from filename if not provided or wildcard job
+  const derivedLabel = backupFile.replace(/-(\d{8}_\d{6})\.tar\.gz$/, '');
+  if (!label || label.endsWith('=*')) {
+    label = derivedLabel;
   }
 
   console.log(`[Restore] Starting restore for: ${label}`);

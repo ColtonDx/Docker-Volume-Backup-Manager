@@ -75,6 +75,18 @@ fi
 
 echo "Extracted backup found at: $EXTRACTED_DIR"
 
+# Derive label from extracted folder name (strip timestamp)
+BASE_DIRNAME=$(basename "$EXTRACTED_DIR")
+EXTRACTED_LABEL="${BASE_DIRNAME%_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9]}"
+echo "Derived label from backup: $EXTRACTED_LABEL"
+LABEL="$EXTRACTED_LABEL"
+
+# Re-find containers with the derived label
+CONTAINERS=$(docker ps -a --filter "label=$LABEL" --format "{{.ID}}")
+if [[ -z "$CONTAINERS" ]]; then
+    echo "Warning: No containers found with derived label: $LABEL"
+fi
+
 # Get volumes for the containers
 echo "Restoring volumes..."
 for container_id in $CONTAINERS; do
@@ -99,7 +111,10 @@ for container_id in $CONTAINERS; do
         # Copy backup contents to volume
         BACKUP_VOLUME_DIR="$EXTRACTED_DIR/$volume_name"
         if [[ -d "$BACKUP_VOLUME_DIR" ]]; then
-            echo "  Restoring contents from backup..."
+            echo "  Wiping existing volume and restoring contents from backup..."
+            if [[ -d "$VOLUME_DATA_PATH" ]]; then
+              find "$VOLUME_DATA_PATH" -mindepth 1 -delete
+            fi
             cp -r "$BACKUP_VOLUME_DIR"/* "$VOLUME_DATA_PATH/" 2>/dev/null || echo "  Note: Some files may not have been copied (might be expected)"
             echo "  Volume restored successfully"
         else
