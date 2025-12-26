@@ -639,6 +639,20 @@ small {
     font-size: 1em;
 }
 
+.restore-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.restore-buttons .btn-primary {
+    flex: 2;
+}
+
+.restore-buttons .btn-cancel {
+    flex: 1;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
