@@ -364,10 +364,9 @@ app.get('/api/backups/remote/:label/:remote', (req, res) => {
     console.log(`[Remote Backups] Config exists: ${fs.existsSync(RCLONE_CONFIG)}`);
 
     const proc = spawn('rclone', [
-      'ls',
+      'lsf',
       '--config=' + RCLONE_CONFIG,
-      remote + ':/',
-      '-R'
+      remote + ':/'
     ]);
 
     let output = '';
@@ -395,15 +394,10 @@ app.get('/api/backups/remote/:label/:remote', (req, res) => {
 
       console.log(`[Remote Backups] Raw output length: ${output.length}`);
       
-      // Parse rclone output and filter by label
+      // Parse rclone lsf output (which returns just filenames, one per line)
       const files = output
         .split('\n')
-        .filter(line => line.trim())
-        .map(line => {
-          const filename = line.trim().split(/\s+/).pop();
-          console.log(`[Remote Backups] Parsed line: ${line.trim()} -> filename: ${filename}`);
-          return filename;
-        })
+        .map(line => line.trim())
         .filter(file => file && file.startsWith(label + '-') && file.endsWith('.tar.gz'))
         .sort()
         .reverse(); // Most recent first
