@@ -189,6 +189,9 @@ function hideFormSection() {
     remote.disabled = true;
     remoteGroup.classList.add('hidden');
     customCronGroup.classList.add('hidden');
+    dailyTimeGroup.classList.add('hidden');
+    weeklyScheduleGroup.classList.add('hidden');
+    monthlyScheduleGroup.classList.add('hidden');
     retentionGroup.classList.remove('hidden');
     retentionCount.disabled = false;
 }
