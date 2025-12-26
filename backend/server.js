@@ -36,11 +36,20 @@ const SETTINGS_FILE = path.join(__dirname, '../data/settings.json');
 
 function loadSettings() {
   try {
+    let settings = {};
     if (fs.existsSync(SETTINGS_FILE)) {
       const data = fs.readFileSync(SETTINGS_FILE, 'utf-8');
-      return JSON.parse(data);
+      settings = JSON.parse(data);
     }
-    return {};
+    
+    // Load rclone config from the mounted file
+    if (fs.existsSync(RCLONE_CONFIG)) {
+      settings.rcloneConfig = fs.readFileSync(RCLONE_CONFIG, 'utf-8');
+    } else {
+      settings.rcloneConfig = '';
+    }
+    
+    return settings;
   } catch (err) {
     console.error('Error reading settings file:', err);
     return {};
@@ -294,7 +303,20 @@ app.get('/api/settings', (req, res) => {
 // SAVE settings
 app.post('/api/settings', (req, res) => {
   try {
-    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(req.body, null, 2));
+    // Save rclone config to the mounted file separately
+    if (req.body.rcloneConfig !== undefined) {
+      const rcloneDir = path.dirname(RCLONE_CONFIG);
+      if (!fs.existsSync(rcloneDir)) {
+        fs.mkdirSync(rcloneDir, { recursive: true });
+      }
+      fs.writeFileSync(RCLONE_CONFIG, req.body.rcloneConfig, 'utf-8');
+    }
+    
+    // Save other settings (excluding rcloneConfig) to settings.json
+    const settingsToSave = { ...req.body };
+    delete settingsToSave.rcloneConfig;
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settingsToSave, null, 2));
+    
     globalSettings = req.body;
     res.json({ message: 'Settings saved', settings: req.body });
   } catch (err) {
