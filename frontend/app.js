@@ -72,6 +72,12 @@ const confirmMessage = document.getElementById('confirmMessage');
 const confirmYes = document.getElementById('confirmYes');
 const confirmNo = document.getElementById('confirmNo');
 
+// DOM elements - Info Modal
+const infoModal = document.getElementById('infoModal');
+const infoTitle = document.getElementById('infoTitle');
+const infoMessage = document.getElementById('infoMessage');
+const infoOk = document.getElementById('infoOk');
+
 // Frequency to cron mapping
 const frequencyMap = {
     'hourly': '0 * * * *',
@@ -494,6 +500,25 @@ function showNotification(message, type = 'success') {
     }, 3000);
 }
 
+// Show info modal
+function showInfo(message, title = 'Success', isError = false) {
+    return new Promise((resolve) => {
+        infoTitle.textContent = title;
+        infoMessage.textContent = message;
+        infoModal.classList.remove('hidden');
+        infoModal.classList.add('visible');
+        
+        const handleOk = () => {
+            infoModal.classList.remove('visible');
+            infoModal.classList.add('hidden');
+            infoOk.removeEventListener('click', handleOk);
+            resolve();
+        };
+        
+        infoOk.addEventListener('click', handleOk);
+    });
+}
+
 // Toggle job enabled/disabled
 async function toggleJob(jobId) {
     try {
@@ -812,11 +837,11 @@ async function handleRestoreBackup() {
         }
         
         const result = await response.json();
-        showNotification(`Restore completed successfully! Label: ${result.label}`, 'success');
         closeRestoreModal();
+        await showInfo(`Restore completed successfully!\n\nLabel: ${result.label}`, 'Restore Complete');
     } catch (error) {
         console.error('Error restoring backup:', error);
-        showNotification('Failed to restore backup: ' + error.message, 'error');
+        await showInfo('Failed to restore backup: ' + error.message, 'Restore Failed');
     }
 }
 
