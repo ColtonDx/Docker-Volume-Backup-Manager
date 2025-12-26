@@ -778,6 +778,42 @@ small {
     font-size: 1.1em;
 }
 
+/* Notification */
+.notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #27ae60;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    font-weight: 600;
+    z-index: 2000;
+    max-width: 300px;
+    transform: translateY(150px);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.notification:not(.hidden) {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.notification.success {
+    background: #27ae60;
+}
+
+.notification.error {
+    background: #e74c3c;
+}
+
+.notification.hidden {
+    transform: translateY(150px);
+    opacity: 0;
+}
+
 /* Settings fieldsets */
 fieldset {
     border: 1px solid #444;

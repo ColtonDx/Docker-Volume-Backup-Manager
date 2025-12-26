@@ -19,6 +19,7 @@ const customCronGroup = document.getElementById('customCronGroup');
 const enabledCheckbox = document.getElementById('enabled');
 const retentionCount = document.getElementById('retentionCount');
 const retentionGroup = document.getElementById('retentionGroup');
+const notification = document.getElementById('notification');
 
 // DOM elements - Settings
 const settingsBtn = document.getElementById('settingsBtn');
@@ -477,6 +478,22 @@ function showConfirm(message, title = 'Confirm Action') {
     });
 }
 
+// Show notification
+function showNotification(message, type = 'success') {
+    notification.textContent = message;
+    notification.className = `notification ${type} hidden`;
+    
+    // Trigger reflow to ensure transition works
+    setTimeout(() => {
+        notification.classList.remove('hidden');
+    }, 10);
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        notification.classList.add('hidden');
+    }, 3000);
+}
+
 // Toggle job enabled/disabled
 async function toggleJob(jobId) {
     try {
@@ -795,11 +812,11 @@ async function handleRestoreBackup() {
         }
         
         const result = await response.json();
-        alert(`Restore completed successfully!\n\nLabel: ${result.label}`);
+        showNotification(`Restore completed successfully! Label: ${result.label}`, 'success');
         closeRestoreModal();
     } catch (error) {
         console.error('Error restoring backup:', error);
-        alert('Failed to restore backup: ' + error.message);
+        showNotification('Failed to restore backup: ' + error.message, 'error');
     }
 }
 
