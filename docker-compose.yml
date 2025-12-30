@@ -1,6 +1,6 @@
 services:
   backup-manager:
-    build: .
+    image: coltondx/docker-volume-backup-manager
     container_name: backup-manager
     ports:
       - "3000:3000"
@@ -12,6 +12,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - admin_password=${ADMIN_PASSWORD:-}
+      - TZ=${TZ:-UTC}
     restart: unless-stopped
 
 volumes:
