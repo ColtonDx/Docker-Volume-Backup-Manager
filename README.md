@@ -1,4 +1,4 @@
-# Docker Volume Backups
+# Docker Volume Backup Manager
 
 A web-based application for scheduling and managing Docker volume backups with support for local storage and remote cloud backup via [rclone](https://rclone.org/).
 
