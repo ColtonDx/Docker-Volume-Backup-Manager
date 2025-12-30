@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backup-manager:
     image: coltondx/docker-volume-backup-manager
