@@ -2,6 +2,8 @@
 
 A web-based application for scheduling and managing Docker volume backups with support for local storage and remote cloud backup via [rclone](https://rclone.org/).
 
+Disclaimer! AI was used to assist in the creation of the WebApp frontend of this tool. Backend scripts and core functionalities have been refined for UI use but were written by a human.
+
 [![Support](https://img.shields.io/badge/Support-Buy_Me_A_Coffee-yellow?style=for-the-badge&logo=buy%20me%20a%20coffee&color=FFDD00)](https://www.buymeacoffee.com/ColtonDx)
 ## Overview
 
